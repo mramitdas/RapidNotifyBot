@@ -1,26 +1,26 @@
 """
-NotifyMeBot.
+RapidNotifyBot.
 
-This FastAPI application serves as the backend for the NotifyMe service.
+This FastAPI application serves as the backend for the RapidNotify service.
 
 Usage:
-    - Create an instance of this FastAPI application to run the NotifyMe service.
+    - Create an instance of this FastAPI application to run the RapidNotify service.
 
 Example:
     ```python
     from fastapi import FastAPI
     from .api.V1.api import api_router
 
-    app = FastAPI(title="NotifyMe", docs_url="/")
+    app = FastAPI(title="RapidNotify", docs_url="/")
     app.include_router(api_router, prefix="/api/v1")
     ```
 
 Attributes:
-    - title (str): The title of the FastAPI application, set to "NotifyMe".
+    - title (str): The title of the FastAPI application, set to "RapidNotify".
 
     - docs_url (str): The URL path for accessing the FastAPI documentation.
 
-    - api_router (APIRouter): The router containing the API endpoints for the NotifyMe service.
+    - api_router (APIRouter): The router containing the API endpoints for the RapidNotify service.
 
     - prefix (str): The URL prefix for the included router, set to "/api/v1".
 
@@ -35,5 +35,5 @@ from fastapi import FastAPI
 
 from .api.V1.api import api_router
 
-app = FastAPI(title="NotifyMe", docs_url="/")
+app = FastAPI(title="RapidNotify", docs_url="/")
 app.include_router(api_router, prefix="/api/v1")

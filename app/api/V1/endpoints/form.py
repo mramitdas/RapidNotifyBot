@@ -5,7 +5,7 @@ from app.schemas.form import FormInput
 contact_form = APIRouter()
 
 
-@contact_form.post("/notifyme")
+@contact_form.post("/RapidNotify")
 async def register_form_input(data: FormInput):
     try:
         user_dict = data.model_dump(exclude_unset=True)

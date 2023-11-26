@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class FormInput(BaseModel):
     """
-    Pydantic model representing the input data for notifyme endpoint.
+    Pydantic model representing the input data for RapidNotify endpoint.
 
     Attributes:
         bot_key (str): The key identifying the bot.
