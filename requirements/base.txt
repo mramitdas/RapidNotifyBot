@@ -1,0 +1,8 @@
+fastapi==0.103.1
+pydantic==2.5.1
+requests==2.31.0
+uvicorn==0.23.2
+email-validator==2.1.0.post1
+typing_extensions==4.8.0
+annotated-types==0.6.0
+python-dotenv==1.0.0
