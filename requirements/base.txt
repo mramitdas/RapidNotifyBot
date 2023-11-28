@@ -6,3 +6,4 @@ email-validator==2.1.0.post1
 typing_extensions==4.8.0
 annotated-types==0.6.0
 python-dotenv==1.0.0
+python-telegram-bot==20.6
