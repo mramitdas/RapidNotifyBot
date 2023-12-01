@@ -10,25 +10,13 @@ class BaseUser(BaseModel):
     Represents the base user model with common attributes.
 
     Attributes:
-        full_name (str): The full name of the user, constrained to 50 characters with leading/trailing whitespaces stripped.
-        email (EmailStr, optional): The email address of the user, if provided.
-        phone_no (str): The phone number of the user.
-        aadhar_no (int, optional): The Aadhar number of the user if provided.
-        user_role (int, optional): The role or designation of the user, constrained to values:
-            - 0: Super Admin
-            - 1: Admin
-            - 2: Staff
-            - 3: User
 
     Config:
         from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
     """
 
-    full_name: constr(strip_whitespace=True, max_length=50) | None = None
-    email: EmailStr | None = None
-    phone_no: str | None = None
-    aadhar_no: int | None = None
-    user_role: conint(ge=0, le=3) | None = None
+    user_uuid: int | None = None
+    user_telegram_id: int | None = None
 
     class Config:
         """
@@ -72,31 +60,6 @@ class UserIn(TimestampMixin, BaseUser):
     is_staff: bool = False
     is_admin: bool = False
     is_superuser: bool = False
-
-    @validator("aadhar_no", pre=True, always=True)
-    def check_aadhar_no(cls, value):
-        """
-        Validate the Aadhar number.
-
-        This validator method checks if the provided Aadhar number (if not None) is a valid 12-digit integer.
-
-        Args:
-            cls: The Pydantic model class.
-            value: The value of the Aadhar number field to be validated.
-
-        Returns:
-            int or None: The validated Aadhar number if it is valid, or None if the input is None.
-
-        Raises:
-            ValueError: If the provided Aadhar number is not exactly 12 digits long or has a non-integer format.
-
-        Note:
-            This validator is intended for use with Pydantic models and is applied to the "aadhar_no" field.
-        """
-        if value is not None:
-            if not re.match(r"^\d{12}$", str(value)):
-                raise ValueError("Aadhar number must be exactly 12 digits long")
-        return value
 
     class Config:
         """
