@@ -1,8 +1,11 @@
 import logging
 import os
+
 from dotenv import load_dotenv
 from telegram import Update, constants
 from telegram.ext import Application, CommandHandler, ContextTypes
+
+from info import bot_welcome
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -30,7 +33,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 update.effective_chat.id, action=constants.ChatAction.TYPING
             )
             # User welcome
-            await update.message.reply_text(text="Hello", parse_mode="Markdown")
+            await update.message.reply_text(
+                text=bot_welcome(name),
+                parse_mode="Markdown",
+                disable_web_page_preview=True,
+            )
 
         # if user stop the bot
         except Exception as e:
@@ -42,7 +49,7 @@ def main() -> None:
     bot_key = os.environ.get("BOT_KEY")
 
     application = Application.builder().token(bot_key).build()
-    
+
     application.add_handler(CommandHandler("start", start))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
