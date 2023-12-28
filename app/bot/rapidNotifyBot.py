@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from telegram import Update, constants
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-from info import bot_welcome
+from info import bot_welcome, bot_help
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -23,9 +23,9 @@ async def common_args(update: Update):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id, name, username = await common_args(update)
+
     # chat type (group or private)
     chat_type = update.message.chat.type
-
     if chat_type == "private":
         try:
             # Typing Action
@@ -44,6 +44,27 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logging.ERROR(e)
 
 
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id, name, username = await common_args(update)
+
+    # chat type (group or private)
+    chat_type = update.message.chat.type
+    if chat_type == "private":
+        try:
+            # Typing Action
+            await context.bot.send_chat_action(
+                update.effective_chat.id, action=constants.ChatAction.TYPING
+            )
+            # User Help
+            await update.message.reply_text(
+                text=bot_help(name),
+                parse_mode="Markdown",
+                disable_web_page_preview=True,
+            )
+        except Exception as e:
+            logging.ERROR(e)
+
+
 def main() -> None:
     load_dotenv()
     bot_key = os.environ.get("BOT_KEY")
@@ -51,6 +72,7 @@ def main() -> None:
     application = Application.builder().token(bot_key).build()
 
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
