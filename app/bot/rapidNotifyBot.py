@@ -5,12 +5,16 @@ from telegram import Update, constants
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 from app.config.config import Config
+from app.db.mongo import (DataBase, MongoDbClientConfig, QueryDataInput,
+                          UploadDataInput)
 
 from .info import bot_help, bot_subscribe, bot_welcome
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
+db = DataBase(MongoDbClientConfig(**{"db_url": Config.DB_URL}))
+rapidBotDB = {"db_name": Config.DB_NAME, "table_name": Config.TABLE_NAME}
 
 
 async def common_args(update: Update):
@@ -73,7 +77,15 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_type = update.message.chat.type
     if chat_type == "private":
         try:
-            api_key = str(uuid.uuid4())
+            data = {"data": {"_id": user_id}}
+            data.update(rapidBotDB)
+            query_result = db.query(QueryDataInput(**data))
+            if not query_result:
+                api_key = str(uuid.uuid4())
+                data["data"]["api_key"] = api_key
+                db.upload(UploadDataInput(**data))
+            else:
+                api_key = query_result[0]["api_key"]
 
             # Typing Action
             await context.bot.send_chat_action(
