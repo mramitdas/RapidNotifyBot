@@ -1,12 +1,12 @@
 import logging
-import os
 import uuid
 
-from dotenv import load_dotenv
 from telegram import Update, constants
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-from info import bot_welcome, bot_help, bot_subscribe
+from app.config.config import Config
+
+from .info import bot_help, bot_subscribe, bot_welcome
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -90,8 +90,7 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main() -> None:
-    load_dotenv()
-    bot_key = os.environ.get("BOT_KEY")
+    bot_key = Config.BOT_KEY
 
     application = Application.builder().token(bot_key).build()
 
