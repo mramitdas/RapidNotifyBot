@@ -1,4 +1,30 @@
+"""
+RapidNotifyBot Messages
+
+This module provides functions to generate formatted messages for various interactions
+within the RapidNotifyBot Telegram bot. The messages include welcome messages, help messages,
+and subscription confirmation messages.
+
+Functions:
+- `bot_welcome(name: str) -> str`: Generate a welcome message for new users.
+- `bot_help(name: str) -> str`: Generate a help message providing assistance and quick tips.
+- `bot_subscribe(name: str, api_key: str) -> str`: Generate a subscription confirmation message
+  with the user's API key and instructions on getting started.
+"""
+
+
 def bot_welcome(name):
+    """
+    Generate a welcome message for users when they join RapidNotifyBot.
+
+    Parameters:
+    - name (str): The user's first name.
+
+    Returns:
+    str: A formatted welcome message containing information about RapidNotifyBot's key features,
+         how to get started, and how to connect with the support team.
+    """
+
     return f"""
 👋 Welcome to RapidNotifyBot!
 
@@ -28,6 +54,17 @@ The RapidNotifyBot Team
 
 
 def bot_help(name):
+    """
+    Generate a help message providing assistance and quick tips for RapidNotifyBot users.
+
+    Parameters:
+    - name (str): The user's first name.
+
+    Returns:
+    str: A formatted help message containing information about how the support team can assist,
+         quick tips for common commands, and how to connect with the support team.
+    """
+
     return f"""
 👋 Need Help? We've Got Your Back!
 
@@ -56,6 +93,18 @@ The RapidNotifyBot Team
 
 
 def bot_subscribe(name, api_key):
+    """
+    Generate a subscription confirmation message for users who subscribe to RapidNotifyBot.
+
+    Parameters:
+    - name (str): The user's first name.
+    - api_key (str): The personalized API key for the user.
+
+    Returns:
+    str: A formatted subscription confirmation message containing the user's API key and instructions
+         on how to get started with RapidNotifyBot.
+    """
+
     return f"""
 🌟 **Thank You for Subscribing to RapidNotifyBot!**
 
