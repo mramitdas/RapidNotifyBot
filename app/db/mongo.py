@@ -104,7 +104,7 @@ class DataBase:
 
         database = self.mongod[validated_input.db_name]
         dataset = database[validated_input.table_name]
-        return dataset.find(validated_input.filter)
+        return list(dataset.find(validated_input.data))
 
     def update(self, input_data: UpdateDataInput) -> UpdateResult:
         """Update data in a specified database and collection based on filters.
