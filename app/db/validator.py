@@ -16,7 +16,7 @@ class BaseInput(BaseModel):
 
 class UploadDataInput(BaseInput):
     data: Dict
-    
+
     @validator("data", pre=True, always=True)
     def validate_data(cls, value):
         if not value:
@@ -24,14 +24,8 @@ class UploadDataInput(BaseInput):
         return value
 
 
-class QueryDataInput(BaseInput):
-    filter: Dict
-    
-    @validator("data", pre=True, always=True)
-    def validate_data(cls, value):
-        if not value:
-            raise ValueError("filter cannot be blank")
-        return value
+class QueryDataInput(UploadDataInput):
+    pass
 
 
 class UpdateDataInput(BaseInput):
