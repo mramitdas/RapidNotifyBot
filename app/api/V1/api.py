@@ -29,9 +29,8 @@ See Also:
     - FastAPI documentation on APIRouter: https://fastapi.tiangolo.com/tutorial/bigger-applications/
 """
 
+from api.V1.endpoints.form import contact_form
 from fastapi import APIRouter
-
-from app.api.V1.endpoints.form import contact_form
 
 api_router = APIRouter()
 api_router.include_router(contact_form, tags=["Contact Form"])
