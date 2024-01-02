@@ -1,8 +1,6 @@
-from typing import Dict, List, Union
+from typing import Dict
 
-from pydantic import BaseModel, ValidationError, validator
-
-from app.exceptions.custom_exceptions import MissingAttributeError
+from pydantic import BaseModel, validator
 
 
 class MongoDbClientConfig(BaseModel):
