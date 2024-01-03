@@ -54,6 +54,6 @@ class FormClass:
         Returns:
             dict: The data retrieved from the database.
         """
-        data = {"data": {"_id": uuid}}
+        data = {"data": {"api_key": uuid}}
         data.update(self.__rapid_bot_db)
         return self.__db.query(QueryDataInput(**data))
