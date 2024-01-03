@@ -25,5 +25,5 @@ class FormInput(BaseModel):
         ```
     """
 
-    bot_key: str
+    api_key: str
     data: dict
