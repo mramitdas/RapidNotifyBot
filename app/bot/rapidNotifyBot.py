@@ -54,9 +54,6 @@ rapidBotDB = {"db_name": Config.DB_NAME, "table_name": Config.TABLE_NAME}
 
 logger = logging.getLogger("rapidNotifyBot")
 
-db = DataBase(MongoDbClientConfig(**{"db_url": Config.DB_URL}))
-rapidBotDB = {"db_name": Config.DB_NAME, "table_name": Config.TABLE_NAME}
-
 
 async def common_args(update: Update) -> Tuple[int, str, Optional[str]]:
     """
