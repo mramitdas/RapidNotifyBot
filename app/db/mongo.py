@@ -1,6 +1,58 @@
+"""
+Module: mongo
+
+This module defines a utility class for interacting with MongoDB databases.
+
+Classes:
+    - DataBase: A utility class for interacting with MongoDB databases.
+
+Usage:
+    1. Import the DataBase class from this module.
+    2. Create an instance of the DataBase class by providing the necessary configuration.
+    3. Use the methods of the DataBase class to perform various database operations.
+
+Example:
+    ```python
+    from module.mongo import DataBase
+    from module.models import MongoDbClientConfig, UploadDataInput, QueryDataInput, UpdateDataInput, DeleteDataInput
+
+    # Example usage of the DataBase class
+    db_config = MongoDbClientConfig(db_url="mongodb://localhost:27017")
+    database = DataBase(config=db_config)
+
+    # Example usage of database operations
+    upload_data_input = UploadDataInput(db_name="example_db", table_name="example_table", data={"key": "value"})
+    database.upload(input_data=upload_data_input)
+
+    query_data_input = QueryDataInput(db_name="example_db", table_name="example_table", data={"key": "value"})
+    result = database.query(input_data=query_data_input)
+    ```
+
+Classes and Methods:
+    - DataBase:
+        - __init__(config: MongoDbClientConfig): Initializes the MongoDB client instance.
+        - connect() -> pymongo.MongoClient: Establishes a connection to the MongoDB instance.
+        - validate(): Validates input data and raises errors for missing or invalid attributes.
+        - upload(input_data: UploadDataInput) -> pymongo.InsertOneResult or pymongo.InsertManyResult:
+            Inserts data into a specified database and collection.
+        - query(input_data: QueryDataInput) -> pymongo.cursor.Cursor or dict: Retrieves data based on provided filters.
+        - update(input_data: UpdateDataInput) -> pymongo.UpdateResult: Updates data based on provided filters.
+        - delete(input_data: DeleteDataInput) -> pymongo.DeleteResult: Deletes data based on provided filters.
+
+Notes:
+    - This class is designed for MongoDB database interactions.
+    - You can connect to a MongoDB instance by providing the `db_url` parameter during initialization.
+    - The provided methods handle data validation and various database operations.
+"""
+
 import pymongo
 from pydantic import ValidationError
-from pymongo.results import UpdateResult
+from pymongo.results import (
+    DeleteResult,
+    InsertManyResult,
+    InsertOneResult,
+    UpdateResult,
+)
 
 from .validator import (
     DeleteDataInput,
@@ -18,19 +70,19 @@ class DataBase:
     This class provides methods for connecting to a MongoDB instance, validating input data, and performing various database operations such as uploading, querying, updating, and deleting data.
 
     Args:
-        db_url (str, optional): The connection URL for the MongoDB instance.
+        config (MongoDbClientConfig): The configuration for the MongoDB client.
 
     Attributes:
         database_url (str): The URL of the connected MongoDB instance.
         mongod (pymongo.MongoClient): The MongoDB client instance established using the provided URL.
 
     Methods:
-        - connect(): Establishes a connection to the MongoDB instance.
+        - connect() -> pymongo.MongoClient: Establishes a connection to the MongoDB instance.
         - validate(): Validates input data and raises errors for missing or invalid attributes.
-        - upload(): Inserts data into a specified database and collection.
-        - query(): Retrieves data from a specified database and collection based on provided filters.
-        - update(): Updates data in a specified database and collection based on provided filters.
-        - delete(): Deletes data from a specified database and collection based on provided filters.
+        - upload(input_data: UploadDataInput) -> pymongo.InsertOneResult or pymongo.InsertManyResult: Inserts data into a specified database and collection.
+        - query(input_data: QueryDataInput) -> pymongo.cursor.Cursor or dict: Retrieves data based on provided filters.
+        - update(input_data: UpdateDataInput) -> pymongo.UpdateResult: Updates data based on provided filters.
+        - delete(input_data: DeleteDataInput) -> pymongo.DeleteResult: Deletes data based on provided filters.
 
     Notes:
         - This class is designed for MongoDB database interactions.
@@ -63,7 +115,9 @@ class DataBase:
         """
         return pymongo.MongoClient(self.database_url)
 
-    def upload(self, input_data: UploadDataInput):
+    def upload(
+        self, input_data: UploadDataInput
+    ) -> InsertOneResult or InsertManyResult:
         """Insert data into a specified database and collection.
 
         Args:
@@ -71,7 +125,10 @@ class DataBase:
                 collection name, and the data to be inserted.
 
         Returns:
-            pymongo.InsertOneResult or pymongo.InsertManyResult: The response object indicating the result of the insertion.
+            InsertOneResult or InsertManyResult: The response object indicating the result of the insertion.
+
+        Raises:
+            ValueError: If the input data is invalid.
         """
         try:
             validated_input = UploadDataInput(**input_data.model_dump())
@@ -84,7 +141,7 @@ class DataBase:
 
         return dataset.insert_one(validated_input.data)
 
-    def query(self, input_data: QueryDataInput):
+    def query(self, input_data: QueryDataInput) -> list:
         """Retrieve data from a specified database and collection based on filters.
 
         Args:
@@ -92,7 +149,8 @@ class DataBase:
                 collection name, filter
 
         Returns:
-            pymongo.cursor.Cursor or dict: The retrieved data.
+            dict: The retrieved data.
+
         Raises:
             ValueError: If the input data is invalid.
         """
@@ -114,7 +172,8 @@ class DataBase:
                 collection name, and the data to be updated.
 
         Returns:
-            pymongo.UpdateResult: The response object indicating the result of the update operation.
+            UpdateResult: The response object indicating the result of the update operation.
+
         Raises:
             ValueError: If the input data is invalid.
         """
@@ -132,7 +191,7 @@ class DataBase:
             {"$set": validated_input.data["user_data"]},
         )
 
-    def delete(self, input_data: DeleteDataInput):
+    def delete(self, input_data: DeleteDataInput) -> DeleteResult:
         """
         Delete data from a specified database collection based on a filter.
 
@@ -141,7 +200,7 @@ class DataBase:
                 collection name, and the filter to be applied for deletion.
 
         Returns:
-            pymongo.DeleteResult: The response object indicating the result of the delete operation.
+            DeleteResult: The response object indicating the result of the delete operation.
         Raises:
             ValueError: If any input is invalid.
         """
@@ -153,4 +212,4 @@ class DataBase:
 
         database = self.mongod[validated_input.db_name]
         dataset = database[validated_input.table_name]
-        return dataset.delete_one(validated_input.filter)
+        return dataset.delete_one(validated_input.data)
