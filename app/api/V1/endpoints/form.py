@@ -49,6 +49,7 @@ async def register_form_input(data: FormInput):
     Raises:
         HTTPException: Raised in case of API or Telegram-related errors, providing appropriate status codes and details.
     """
+
     def _get_user_data(api_key: str):
         """
         Retrieve existing user data using the provided API key.
@@ -107,6 +108,12 @@ async def register_form_input(data: FormInput):
         raise HTTPException(
             status_code=500, detail=f"Failed to retrieve existing user data: {e}"
         ) from e
+
+    if not response:
+        return {
+            "status": "error",
+            "message": "Invalid API key. Please provide a valid API key.",
+        }
 
     uuid = response[0]["_id"]
     message = join_dict_values(user_dict["data"])
