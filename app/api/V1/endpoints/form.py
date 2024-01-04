@@ -119,6 +119,6 @@ async def register_form_input(data: FormInput):
     message = join_dict_values(user_dict["data"])
 
     telegram_url = TELEGRAM_API_URL.format(Config.BOT_KEY, uuid, message)
-    telegram_response = _send_telegram_message(telegram_url)
+    _send_telegram_message(telegram_url)
 
-    return telegram_response.text
+    return {"status": "success", "message": "Notification sent successfully."}
