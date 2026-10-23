@@ -24,15 +24,13 @@ the first three sections are rewritten.
 - **Packaging/deploy:** Docker (multi-stage), docker-compose (api, bot, postgres)
 - **License:** Apache 2.0
 
-**Legacy stack (v1, being replaced):** MongoDB (PyMongo), `requests`, imports
-that assume CWD is `app/`. Do not build on it; v2 is a fresh start with no data
-migration.
-
 ### Branch layout
 
-- `prod` — default/protected branch. Merges happen via PR only.
-- `dev` — integration branch.
-- `stag` — staging.
+- `prod` — default/protected branch. **Can be merged only from `stag`.**
+- `stag` — staging. **Can be merged only from `dev`.**
+- `dev` — integration branch. **Can be merged from any other branch.**
+- Feature/issue branches (`<type>/<issue#>-<slug>`) target `dev`. Promotion
+  through the chain happens via PRs only, one hop at a time.
 
 ---
 
@@ -151,16 +149,21 @@ ask instead of guessing.
 - Branch naming: `<type>/<issue#>-<slug>` (e.g. `feat/12-rate-limiting`).
 - One task = one commit: conventional commits (`feat:`, `fix:`, `chore:`,
   `docs:`, `test:`), subject ≤ 50 chars, commit body ends with `refs #N`.
-- Work happens on the issue branch; the PR targets the default branch.
+- Work happens on the issue branch; the PR targets `dev`. Promotion is
+  sequential and PR-only: `dev` → `stag` → `prod`. Never skip or reorder
+  a hop; PRs into `prod` must come from `stag` only, PRs into `stag` from
+  `dev` only.
 - **PR checklist gates (all required before merge):**
   - tests pass (real command output),
   - black/isort/mypy/flake8 clean,
   - no secrets and no `.env` in the diff,
   - acceptance criteria demonstrably met,
-  - docs updated if behavior/setup changed.
+  - docs updated if behavior/setup changed,
+  - PR targets the correct branch in the chain (`dev` ← branch,
+    `stag` ← `dev`, `prod` ← `stag`).
 - Issue is closed **only** after its PR is merged. Never close otherwise.
-- Never commit or PR directly to protected branches (`prod`, `main`), even for
-  docs. No skip-hooks (`--no-verify`), no force-pushing.
+- Never commit or PR directly to protected branches (`prod`, `stag`, `main`),
+  even for docs. No skip-hooks (`--no-verify`), no force-pushing.
 
 ### 4. Task granularity & tracking
 
