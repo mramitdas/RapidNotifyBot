@@ -15,11 +15,22 @@ class RateLimitExceeded(Exception):
         super().__init__(f"rate limit exceeded, retry in {retry_after}s")
 
 
-async def check_and_record(session: AsyncSession, api_key_hash: str) -> None:
+async def check_and_record(
+    session: AsyncSession,
+    api_key_hash: str,
+    limit: int | None = None,
+    window_seconds: int | None = None,
+) -> None:
     """Count hits inside the window; raise if at the limit, else record one."""
     settings = get_settings()
-    limit = settings.rate_limit_requests
-    window = timedelta(seconds=settings.rate_limit_window_seconds)
+    max_requests = limit if limit is not None else settings.rate_limit_requests
+    window = timedelta(
+        seconds=(
+            window_seconds
+            if window_seconds is not None
+            else settings.rate_limit_window_seconds
+        )
+    )
     now = utcnow()
 
     count = await session.scalar(
@@ -28,8 +39,8 @@ async def check_and_record(session: AsyncSession, api_key_hash: str) -> None:
         .where(RateLimitHit.api_key_hash == api_key_hash)
         .where(RateLimitHit.ts > now - window)
     )
-    if count is not None and count >= limit:
-        raise RateLimitExceeded(retry_after=settings.rate_limit_window_seconds)
+    if count is not None and count >= max_requests:
+        raise RateLimitExceeded(retry_after=int(window.total_seconds()))
 
     await session.execute(
         delete(RateLimitHit).where(RateLimitHit.ts < now - window - timedelta(days=7))
