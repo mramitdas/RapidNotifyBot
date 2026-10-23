@@ -4,7 +4,6 @@ Each function takes a DB session maker and returns reply text; the Telegram
 wiring lives in bot/main.py.
 """
 
-from html import escape
 from typing import Any
 
 import structlog
@@ -19,12 +18,12 @@ log = structlog.get_logger("bot")
 
 WELCOME = (
     "👋 Welcome to RapidNotify!\n\n"
-    "Send notifications from your apps and scripts with a single API call.\n\n"
-    "📡 Supported platforms:\n"
-    "• Telegram\n"
-    "• Slack\n"
-    "• Discord\n"
-    "• Custom Webhooks\n\n"
+    "*Send notifications from your apps and scripts with a single API call.*\n\n"
+    "*Supported platforms:*\n"
+    "* • Telegram*\n"
+    "* • Slack*\n"
+    "* • Discord*\n"
+    "* • Custom Webhooks*\n\n"
     "Commands:\n"
     "/subscribe — Get your API key and set up channels\n"
     "/help — Show this message"
@@ -67,19 +66,19 @@ async def subscribe(session: Any, settings: Settings, telegram_user_id: int) -> 
         )
 
     token_raw = await issue_registration_token(session, telegram_user_id)
-    link = f"{settings.public_base_url.rstrip('/')}" f"/api/channels/entry/{token_raw}"
+    base_url = settings.public_base_url.rstrip("/")
+    link = f"{base_url}/api/channels/entry/{token_raw}"
     intro = "🔑 Your new API key" if created else "🔑 Your API key (rotated)"
     return (
         f"{intro} — save it securely; it's shown only once:\n\n"
-        f"<code>{escape(raw_key)}</code>\n\n"
-        "📡 <b>Supported platforms:</b>\n"
+        f"`{raw_key}`\n\n"
+        "*📡 Supported platforms:*\n"
         "• Telegram\n"
         "• Slack\n"
         "• Discord\n"
         "• Custom Webhooks\n\n"
-        f"⚙️ Configure them here: "
-        f'<a href="{escape(link, quote=True)}">here</a>\n\n'
-        "🚀 <b>Send notifications:</b>\n"
-        f"• Endpoint: <code>{{base}}/api/v1/notify</code>\n"
-        "• Header: <code>X-API-Key</code>"
+        f"⚙️ Configure them here: [here]({link})\n\n"
+        "*🚀 Send notifications:*\n"
+        f"• Endpoint: `{base_url}/api/v1/notify`\n"
+        "• Header: `X-API-Key`"
     )
