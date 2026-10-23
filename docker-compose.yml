@@ -17,7 +17,7 @@ services:
     build: .
     command: alembic upgrade head
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://rapid:rapid@postgres:5432/rapidnotify}
+      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+asyncpg://rapid:rapid@postgres:5432/rapidnotify}
       KEY_PEPPER: ${KEY_PEPPER:?set KEY_PEPPER in .env}
     depends_on:
       postgres:
@@ -31,7 +31,7 @@ services:
       - path: .env
         required: false
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://rapid:rapid@postgres:5432/rapidnotify}
+      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+asyncpg://rapid:rapid@postgres:5432/rapidnotify}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -45,7 +45,7 @@ services:
       - path: .env
         required: false
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://rapid:rapid@postgres:5432/rapidnotify}
+      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+asyncpg://rapid:rapid@postgres:5432/rapidnotify}
     depends_on:
       migrate:
         condition: service_completed_successfully
