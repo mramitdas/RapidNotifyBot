@@ -1,0 +1,30 @@
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+# NOTE: legacy v1 exclusions are temporary until T12 removes v1 code.
+extend-exclude = "app/(config|models|schemas|api/V1|bot/(info|rapidNotifyBot)\\.py|db/(mongo|validator)\\.py|main\\.py)"
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip_glob = ["app/config/*", "app/models/*", "app/schemas/*", "app/api/V1/*", "app/bot/info.py", "app/bot/rapidNotifyBot.py", "app/db/mongo.py", "app/db/validator.py"]
+
+[tool.mypy]
+python_version = "3.13"
+explicit_package_bases = true
+mypy_path = "."
+strict = false
+disallow_untyped_defs = true
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+exclude = ["alembic/", "venv/", "app/config/", "app/models/", "app/schemas/", "app/api/V1/", "app/bot/(info|rapidNotifyBot)\\.", "app/db/(mongo|validator)\\.", "app/main\\.py"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["alembic/*", "tests/*"]

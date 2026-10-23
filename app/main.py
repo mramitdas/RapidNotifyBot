@@ -24,6 +24,7 @@ Attributes:
 See Also:
     - FastAPI documentation for creating applications: https://fastapi.tiangolo.com/tutorial/first-steps/
 """
+
 from api.V1.api import api_router
 from fastapi import FastAPI
 
