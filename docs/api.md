@@ -57,3 +57,41 @@ env; `users.rate_limit_tier` exists for future per-plan limits.
 ## Error shape
 
 FastAPI JSON: `{"detail": "..."}`.
+
+## How your API key is protected
+
+Storage model: `sha256(KEY_PEPPER + raw_key)` — the raw key is never
+persisted; only the hash is stored, so a key can be shown exactly once
+(at `/subscribe` or key rotation).
+
+Why no per-key salt?
+
+- **Salts defend against precomputation and password reuse.** They matter
+  for low-entropy secrets (passwords). RapidNotify keys are 192-bit random
+  tokens (`rn_` + 32 urlsafe chars); each key is already high-entropy, so
+  rainbow tables and credential-stuffing attacks do not apply.
+- **Point lookup requires a deterministic global hash.** Auth computes one
+  hash of the presented key and does an indexed lookup. A per-key salt
+  cannot be applied before the key is known — lookups would degrade into
+  scans or require an auxiliary salt→key mapping.
+
+Why a pepper at all? The pepper lives in the environment (`KEY_PEPPER`),
+not in the database:
+
+- **DB leak alone** → attacker gets SHA-256 hashes of 192-bit random keys;
+  brute force is computationally infeasible (~2^192), pepper makes
+  precomputation impossible too.
+- **ENV leak alone** → no hashes at all to attack.
+- **Both leak together** → reversing hashes still requires brute-forcing a
+  192-bit key. Practical risk is negligible.
+
+Threat-model boundaries (what this design does *not* claim):
+
+- If an attacker obtains a valid raw key itself (e.g., from your logs or
+  chat history), hashing does not help — treat keys like passwords: log
+  them nowhere, share over no chat.
+- `KEY_PEPPER` staying constant means no re-hash on restart; changing it
+  invalidates every stored key hash (documented in installation.md).
+- A slow KDF (argon2id/HMAC upgrade) was evaluated and deliberately
+  skipped: it complicates point lookups for negligible gain at this key
+  entropy. Revisit if the key format ever becomes human-chosen.
