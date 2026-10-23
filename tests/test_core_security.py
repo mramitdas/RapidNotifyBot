@@ -44,6 +44,14 @@ def test_ssrf_blocks_private_ip_literal_hosts() -> None:
     assert is_ssrf_safe_url("https://0.0.0.0/hook") is False
 
 
+def test_ssrf_blocks_localhost_hostname_and_fails_closed_on_unresolvable() -> None:
+    # Hostname that resolves to loopback must be blocked now that hostnames
+    # are resolved (e.g. 127.0.0.1.nip.io style bypasses are closed by DNS check).
+    assert is_ssrf_safe_url("https://localhost/hook") is False
+    assert is_ssrf_safe_url("http://localhost:9000/hook", allow_http=True) is False
+    assert is_ssrf_safe_url("https://this-host-does-not-resolve.invalid/hook") is False
+
+
 def test_ssrf_allows_public_https_and_blocks_other_schemes() -> None:
     assert is_ssrf_safe_url("https://hooks.slack.com/services/a/b/c") is True
     assert is_ssrf_safe_url("https://8.8.8.8/hook") is True
