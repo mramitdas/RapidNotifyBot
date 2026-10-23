@@ -19,10 +19,15 @@ log = structlog.get_logger("bot")
 
 WELCOME = (
     "👋 Welcome to RapidNotify!\n\n"
-    "Send notifications to your Telegram, Slack, Discord or webhook from "
-    "anywhere with a single API call.\n\n"
-    "Commands:\n/subscribe — get your API key and channel setup link\n"
-    "/help — this message"
+    "Send notifications from your apps and scripts with a single API call.\n\n"
+    "📡 Supported platforms:\n"
+    "• Telegram\n"
+    "• Slack\n"
+    "• Discord\n"
+    "• Custom Webhooks\n\n"
+    "Commands:\n"
+    "/subscribe — Get your API key and set up channels\n"
+    "/help — Show this message"
 )
 HELP = WELCOME
 
