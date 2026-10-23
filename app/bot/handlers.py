@@ -4,6 +4,7 @@ Each function takes a DB session maker and returns reply text; the Telegram
 wiring lives in bot/main.py.
 """
 
+from html import escape
 from typing import Any
 
 import structlog
@@ -71,14 +72,15 @@ async def subscribe(session: Any, settings: Settings, telegram_user_id: int) -> 
     intro = "🔑 Your new API key" if created else "🔑 Your API key (rotated)"
     return (
         f"{intro} — save it securely; it's shown only once:\n\n"
-        f"`{raw_key}`\n\n"
-        "*📡 Supported platforms:*\n"
+        f"`<code>{raw_key}</code>`\n\n"
+        "<b>📡 Supported platforms:</b>\n"
         "• Telegram\n"
         "• Slack\n"
         "• Discord\n"
         "• Custom Webhooks\n\n"
-        f"⚙️ Configure them here: [here]({link})\n\n"
-        "*🚀 Send notifications:*\n"
-        f"• Endpoint: `{base_url}/api/v1/notify`\n"
-        "• Header: `X-API-Key`"
+        f"⚙️ Configure them here: "
+        f'<a href="{escape(link, quote=True)}">here</a>\n\n'
+        "<b>🚀 Send notifications:</b>\n"
+        f"• Endpoint: `<code>{{base}}/api/v1/notify</code>`\n"
+        "• Header: `<code>X-API-Key</code>`"
     )
