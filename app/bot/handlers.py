@@ -4,13 +4,13 @@ Each function takes a DB session maker and returns reply text; the Telegram
 wiring lives in bot/main.py.
 """
 
+from html import escape
 from typing import Any
 
 import structlog
 from sqlalchemy import select
 
 from app.api.pages import issue_registration_token
-from app.channels.registry import supported_channels
 from app.core.config import Settings
 from app.core.security import generate_api_key, hash_key
 from app.db import models as m
@@ -70,10 +70,16 @@ async def subscribe(session: Any, settings: Settings, telegram_user_id: int) -> 
     link = f"{settings.public_base_url.rstrip('/')}" f"/api/channels/entry/{token_raw}"
     intro = "🔑 Your new API key" if created else "🔑 Your API key (rotated)"
     return (
-        f"{intro} — shown only once:\n\n"
-        f"`{raw_key}`\n\n"
-        "Register Slack, Discord or webhook channels here:\n"
-        f"{link}\n\n"
-        f"Then POST to {{base}}/api/v1/notify with X-API-Key header. "
-        f"Channels supported: {', '.join(supported_channels())}."
+        f"{intro} — save it securely; it's shown only once:\n\n"
+        f"<code>{escape(raw_key)}</code>\n\n"
+        "📡 <b>Supported platforms:</b>\n"
+        "• Telegram\n"
+        "• Slack\n"
+        "• Discord\n"
+        "• Custom Webhooks\n\n"
+        f"⚙️ Configure them here: "
+        f'<a href="{escape(link, quote=True)}">Setup</a>\n\n'
+        "🚀 <b>Send notifications:</b>\n"
+        f"• Endpoint: <code>{{base}}/api/v1/notify</code>\n"
+        "• Header: <code>X-API-Key</code>"
     )

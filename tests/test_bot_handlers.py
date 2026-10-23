@@ -50,7 +50,7 @@ def test_subscribe_creates_user_and_returns_key_once(tmp_path) -> None:
 
     text = anyio.run(_run)
     assert "Your new API key" in text
-    assert "`rn_" in text
+    assert "<code>rn_" in text
     assert "rapid.example/api/channels/entry/" in text
 
     async def _check() -> m.User | None:
@@ -63,7 +63,7 @@ def test_subscribe_creates_user_and_returns_key_once(tmp_path) -> None:
     assert isinstance(user, m.User)
     assert len(user.api_key_hash) == 64
     # exactly one key occurrence (shown once)
-    assert text.count("`rn_") == 1
+    assert len(re.findall(r"<code>rn_[^<]+</code>", text)) == 1
 
 
 def test_subscribe_again_rotates_key(tmp_path) -> None:
@@ -78,8 +78,8 @@ def test_subscribe_again_rotates_key(tmp_path) -> None:
     first = anyio.run(_run, 888)
     second = anyio.run(_run, 888)
     assert "rotated" in second
-    raw_first = re.search(r"`(rn_[^`]+)`", first).group(1)
-    raw_second = re.search(r"`(rn_[^`]+)`", second).group(1)
+    raw_first = re.search(r"<code>(rn_[^<]+)</code>", first).group(1)
+    raw_second = re.search(r"<code>(rn_[^<]+)</code>", second).group(1)
     assert raw_first != raw_second
 
     async def _count() -> int:

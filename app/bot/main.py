@@ -32,7 +32,7 @@ async def _cmd_subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     async with SessionLocal() as session:
         text = await subscribe(session, settings, telegram_user_id)
         await session.commit()
-    await _msg(update).reply_text(text, parse_mode=ParseMode.MARKDOWN)
+    await _msg(update).reply_text(text, parse_mode=ParseMode.HTML)
 
 
 def create_application() -> Application:
