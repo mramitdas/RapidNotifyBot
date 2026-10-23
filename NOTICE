@@ -1,0 +1,13 @@
+RapidNotify
+Copyright 2025 Amit Das
+
+This product includes software developed by Amit Das and contributors to
+the RapidNotifyBot project (https://github.com/mramitdas/RapidNotifyBot).
+
+Third-party services used at runtime (not bundled):
+- Telegram Bot API via python-telegram-bot (LGPL-3.0). See
+  https://github.com/python-telegram-bot/python-telegram-bot for details.
+- FastAPI, Starlette and Uvicorn carry BSD-style licenses; see their
+  individual distribution notices.
+- SQLAlchemy (MIT), Alembic (MIT), httpx (BSD-3-Clause), Pydantic (MIT),
+  structlog (MIT/Apache-2.0).
