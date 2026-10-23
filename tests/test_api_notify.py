@@ -122,3 +122,12 @@ def test_nested_data_rendered_flat(client) -> None:
     assert resp.status_code == 200
     req = holder["transport"].requests[0]
     assert "env=prod, by=amit" in req.content.decode()
+
+
+def test_notify_payload_too_large_413(client) -> None:
+    http_client, _holder = client
+    big = "x" * (get_settings().max_payload_bytes)
+    resp = http_client.post(
+        "/api/v1/notify", json={"channel": "slack", "data": {"d": big}}
+    )
+    assert resp.status_code == 413
