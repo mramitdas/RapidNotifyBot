@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rapid}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rapid}
+      POSTGRES_DB: ${POSTGRES_DB:-rapidnotify}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rapid}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: .
+    command: alembic upgrade head
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://rapid:rapid@postgres:5432/rapidnotify}
+      KEY_PEPPER: ${KEY_PEPPER:?set KEY_PEPPER in .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://rapid:rapid@postgres:5432/rapidnotify}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; urllib.request.urlopen('http://localhost:8000/api/v1/me')\" || exit 0"]
+
+  bot:
+    build: .
+    command: python -m app.bot.main
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://rapid:rapid@postgres:5432/rapidnotify}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:

@@ -1,0 +1,10 @@
+__pycache__
+venv
+.env
+tests
+docs
+docker-compose.yml
+.mypy_cache
+.pytest_cache
+*.log
+git
