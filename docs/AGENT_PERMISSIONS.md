@@ -6,7 +6,11 @@ It is referenced by `AGENTS.md` (Guardrails & Boundaries).
 
 ## Standing approvals (pre-authorized)
 
-- Creating/deleting agent-created branches (`<type>/<issue#>-<slug>`).
+- Creating/deleting **agent-created feature branches** (`<type>/<issue#>-<slug>`).
+  Deleting `dev`, `stag`, or `prod` — including by merging a promotion-hop
+  PR with `--delete-branch` (which deletes the head branch) — is **not**
+  pre-authorized; merge integration hops without it and clean up feature
+  branches manually.
 - Commits, pushes to agent-created branches, and `origin` remote operations.
 - Creating/updating/closing GitHub issues and comments.
 - Creating PRs targeting `prod` and **merging own PRs** (`gh pr merge --merge --delete-branch`)

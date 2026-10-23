@@ -164,6 +164,11 @@ ask instead of guessing.
 - Issue is closed **only** after its PR is merged. Never close otherwise.
 - Never commit or PR directly to protected branches (`prod`, `stag`, `main`),
   even for docs. No skip-hooks (`--no-verify`), no force-pushing.
+- **Never head-delete integration branches.** Merging a PR with
+  `gh pr merge --delete-branch` deletes the PR's head branch, so use it
+  only for feature/issue branches. PRs whose head is `dev`, `stag`, or
+  `prod` (promotion hops) must be merged without `--delete-branch`.
+  Feature-branch cleanup is manual or guarded by GitHub branch protection.
 
 ### 4. Task granularity & tracking
 
@@ -186,7 +191,8 @@ ask instead of guessing.
 ### 6. Destructive & irreversible operations
 
 - The following require explicit, current-session user approval before
-  running: `git push --force`, branch deletion, dropping/updating-down DB
+  running: `git push --force`, branch deletion (including of integration
+  branches `dev`, `stag`, `prod`), dropping/updating-down DB
   migrations, deleting files beyond the current task's scope, publishing or
   releasing, and anything modifying `main`/`prod` history.
 - Never touch files outside the workspace directory.
