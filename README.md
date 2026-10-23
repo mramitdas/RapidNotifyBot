@@ -25,7 +25,7 @@ call.**
   vendor lock-in; single Postgres dependency.
 - **Secure by design** — API keys stored hashed (sha256 + pepper), shown
   exactly once; webhook URLs SSRF-validated (private-IP blocking); rate
-  limiting per key.
+  limiting per key. See [key protection threat model](docs/api.md#how-your-api-key-is-protected).
 - **Production-grade** — async FastAPI + SQLAlchemy 2.x, Alembic migrations,
   structured logs, Docker/compose, full test suite, CI-gated quality (black,
   isort, mypy, flake8, pytest).
