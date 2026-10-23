@@ -19,11 +19,11 @@ def _msg(update: Update) -> Any:
 
 
 async def _cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await _msg(update).reply_text(WELCOME)
+    await _msg(update).reply_text(WELCOME, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 async def _cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await _msg(update).reply_text(HELP)
+    await _msg(update).reply_text(HELP, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 async def _cmd_subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -32,7 +32,7 @@ async def _cmd_subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     async with SessionLocal() as session:
         text = await subscribe(session, settings, telegram_user_id)
         await session.commit()
-    await _msg(update).reply_text(text, parse_mode=ParseMode.HTML)
+    await _msg(update).reply_text(text, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def create_application() -> Application:

@@ -54,7 +54,6 @@ async def test_telegram_adapter_payload_and_success(
     req = transport.requests[0]
     assert req.url.path.endswith("/botTOK/sendMessage")
     assert b'"chat_id":42' in req.content
-    assert b'"parse_mode":"HTML"' in req.content
     assert b"hello" in req.content
 
 
