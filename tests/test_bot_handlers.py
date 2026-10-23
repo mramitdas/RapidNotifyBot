@@ -121,3 +121,74 @@ def test_registration_tokens_accumulate(tmp_path) -> None:
 def test_welcome_and_help_content() -> None:
     assert "/subscribe" in WELCOME
     assert "/help" in HELP
+
+
+def test_subscribe_creates_implicit_telegram_channel(tmp_path) -> None:
+    sm = _make_db(tmp_path)
+
+    async def _run(subscribe_id: int) -> None:
+        async with sm() as session:
+            await subscribe(session, _settings(), subscribe_id)
+            await session.commit()
+
+    anyio.run(_run, 555)
+
+    async def _check() -> m.Channel | None:
+        async with sm() as session:
+            user = await session.scalar(
+                select(m.User).where(m.User.telegram_user_id == 555)
+            )
+            return await session.scalar(
+                select(m.Channel).where(
+                    m.Channel.user_id == user.id, m.Channel.type == "telegram"
+                )
+            )
+
+    channel = anyio.run(_check)
+    assert isinstance(channel, m.Channel)
+    assert channel.enabled is True
+    assert channel.config == {"chat_id": 555}
+
+
+def test_rotate_also_backfills_missing_telegram_channel(tmp_path) -> None:
+    sm = _make_db(tmp_path)
+
+    async def _run(subscribe_id: int) -> None:
+        async with sm() as session:
+            await subscribe(session, _settings(), subscribe_id)
+            await session.commit()
+
+    async def _telegram_channel_exists(subscribe_id: int) -> bool:
+        async with sm() as session:
+            user = await session.scalar(
+                select(m.User).where(m.User.telegram_user_id == subscribe_id)
+            )
+            ch = await session.scalar(
+                select(m.Channel).where(
+                    m.Channel.user_id == user.id, m.Channel.type == "telegram"
+                )
+            )
+            return ch is not None
+
+    async def _drop_channel(subscribe_id: int) -> None:
+        async with sm() as session:
+            user = await session.scalar(
+                select(m.User).where(m.User.telegram_user_id == subscribe_id)
+            )
+            ch = await session.scalar(
+                select(m.Channel).where(
+                    m.Channel.user_id == user.id, m.Channel.type == "telegram"
+                )
+            )
+            await session.delete(ch)
+            await session.commit()
+
+    # First subscribe creates it; second (rotate) keeps it.
+    anyio.run(_run, 666)
+    assert anyio.run(_telegram_channel_exists, 666)
+
+    # Simulate a legacy user whose telegram row is missing: rotate must backfill.
+    anyio.run(_drop_channel, 666)
+    assert not anyio.run(_telegram_channel_exists, 666)
+    anyio.run(_run, 666)
+    assert anyio.run(_telegram_channel_exists, 666)

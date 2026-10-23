@@ -45,6 +45,22 @@ async def subscribe(session: Any, settings: Settings, telegram_user_id: int) -> 
         user.api_key_hash = hash_key(raw_key, settings.key_pepper)
         created = False
 
+    # The Telegram channel is implicit at subscribe time: notify() requires a
+    # Channel row per user, so create it (config carries the default chat_id).
+    tg_channel = await session.scalar(
+        select(m.Channel).where(
+            m.Channel.user_id == user.id, m.Channel.type == "telegram"
+        )
+    )
+    if tg_channel is None:
+        session.add(
+            m.Channel(
+                user_id=user.id,
+                type="telegram",
+                config={"chat_id": telegram_user_id},
+            )
+        )
+
     token_raw = await issue_registration_token(session, telegram_user_id)
     link = f"{settings.public_base_url.rstrip('/')}" f"/api/channels/entry/{token_raw}"
     intro = "🔑 Your new API key" if created else "🔑 Your API key (rotated)"
