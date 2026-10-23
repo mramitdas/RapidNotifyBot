@@ -78,7 +78,7 @@ async def subscribe(session: Any, settings: Settings, telegram_user_id: int) -> 
         "• Discord\n"
         "• Custom Webhooks\n\n"
         f"⚙️ Configure them here: "
-        f'<a href="{escape(link, quote=True)}">Setup</a>\n\n'
+        f'<a href="{escape(link, quote=True)}">here</a>\n\n'
         "🚀 <b>Send notifications:</b>\n"
         f"• Endpoint: <code>{{base}}/api/v1/notify</code>\n"
         "• Header: <code>X-API-Key</code>"
