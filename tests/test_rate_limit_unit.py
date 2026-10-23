@@ -75,3 +75,22 @@ def test_limiter_records_hit_after_success(tmp_path) -> None:
 def test_raise_is_exception_instance() -> None:
     assert isinstance(RateLimitExceeded(5), Exception)
     assert RateLimitExceeded(5).retry_after == 5
+
+
+def test_rate_limit_for_tier_falls_back_to_global_defaults() -> None:
+    s = get_settings()
+    assert s.rate_limit_for("standard") == (
+        s.rate_limit_requests,
+        s.rate_limit_window_seconds,
+    )
+    assert s.rate_limit_for("unknown-tier") == (
+        s.rate_limit_requests,
+        s.rate_limit_window_seconds,
+    )
+
+
+def test_rate_limit_for_custom_tier_returns_tier_limits() -> None:
+    from app.core.config import Settings
+
+    s = Settings(_env_file=None, rate_limit_tiers={"tight": (2, 60)})
+    assert s.rate_limit_for("tight") == (2, 60)
