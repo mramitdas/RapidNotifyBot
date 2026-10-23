@@ -151,3 +151,37 @@ def test_channels_save_missing_url(client) -> None:
         data={"telegram_user_id": 4242, "channel": "slack", "webhook_url": ""},
     )
     assert "Webhook URL required" in resp.text
+
+
+def test_channels_save_generic_webhook_uses_url_config_key(client) -> None:
+    """Regression: generic webhook adapter reads config['url'] (#133)."""
+    http_client, holder = client
+    raw = _issue_token(holder["db"])
+    assert http_client.get(f"/api/channels/entry/{raw}").status_code == 200
+
+    saved = http_client.post(
+        "/api/channels/save",
+        data={
+            "telegram_user_id": 4242,
+            "channel": "webhook",
+            "webhook_url": "https://example.net/hook",
+        },
+    )
+    assert saved.status_code == 200
+    assert "Webhook channel saved" in saved.text
+
+    async def _read_config():
+        async with holder["db"]() as session:
+            user = await session.scalar(
+                select(m.User).where(m.User.telegram_user_id == 4242)
+            )
+            channel = await session.scalar(
+                select(m.Channel).where(
+                    m.Channel.user_id == user.id, m.Channel.type == "webhook"
+                )
+            )
+            assert channel is not None
+            return channel.config
+
+    config = anyio.run(_read_config)
+    assert config == {"url": "https://example.net/hook"}

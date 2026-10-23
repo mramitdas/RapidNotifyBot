@@ -118,6 +118,10 @@ async def channel_save(
             {"ok": False, "message": "Blocked: private or non-http(s) URL"},
         )
 
+    # The generic webhook adapter (app/channels/webhook.py) reads its target
+    # from config["url"]; slack/discord adapters read config["webhook_url"].
+    config_key = "url" if channel == "webhook" else "webhook_url"
+
     user = await session.scalar(
         select(User).where(User.telegram_user_id == telegram_user_id)
     )
@@ -129,14 +133,14 @@ async def channel_save(
         select(Channel).where(Channel.user_id == user.id, Channel.type == channel)
     )
     if existing is not None:
-        existing.config = {"webhook_url": webhook_url}
+        existing.config = {config_key: webhook_url}
         existing.enabled = True
     else:
         session.add(
             Channel(
                 user_id=user.id,
                 type=channel,
-                config={"webhook_url": webhook_url},
+                config={config_key: webhook_url},
             )
         )
     await session.commit()
