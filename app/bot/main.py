@@ -46,7 +46,7 @@ def create_application() -> Application:
 
 def main() -> None:
     log.info("starting bot, long polling")
-    create_application().run_polling()
+    create_application().run_polling(bootstrap_retries=-1)
 
 
 if __name__ == "__main__":
