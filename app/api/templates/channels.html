@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RapidNotify — channels</title>
+  <style>
+    body{font-family:system-ui,sans-serif;max-width:560px;margin:2rem auto;padding:0 1rem}
+    h1{font-size:1.4rem}
+    fieldset{border:1px solid #ddd;border-radius:8px;margin-bottom:1rem;padding:1rem}
+    input,select{width:100%;padding:.5rem;margin:.4rem 0}
+    button{padding:.5rem 1rem;border-radius:6px;border:0;background:#2563eb;color:#fff;cursor:pointer}
+    code{background:#f2f2f2;padding:.1rem .3rem}
+  </style>
+</head>
+<body>
+  <h1>Register a notification channel</h1>
+  <p>Supported channels: {{ supported }}. Telegram is registered via <code>/subscribe</code> in the bot.</p>
+
+  {% for channel in channels %}
+  <form method="post" action="{{ base_url }}/api/channels/save">
+    <fieldset>
+      <legend>{{ channel|capitalize }}</legend>
+      <input type="hidden" name="telegram_user_id" value="{{ telegram_user_id }}">
+      <input type="hidden" name="channel" value="{{ channel }}">
+      {% if channel == 'webhook' %}
+      <input type="url" name="webhook_url" placeholder="https://your-endpoint.example/hook" required>
+      {% else %}
+      <input type="url" name="webhook_url" placeholder="Paste {{ channel|capitalize }} incoming webhook URL" required>
+      {% endif %}
+      <button type="submit">Save {{ channel }}</button>
+    </fieldset>
+  </form>
+  {% endfor %}
+</body>
+</html>

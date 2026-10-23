@@ -6,10 +6,17 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import CurrentUser, DBSession, Http
-from app.api.schemas import SUPPORTED_CHANNELS, NotifyRequest, NotifyResponse
+from app.api.schemas import (
+    SUPPORTED_CHANNELS,
+    MeResponse,
+    MessageResponse,
+    NotifyRequest,
+    NotifyResponse,
+)
 from app.channels.registry import send_to
 from app.core.config import get_settings
 from app.core.rate_limit import RateLimitExceeded, check_and_record
+from app.core.security import generate_api_key, hash_key
 from app.db.models import Channel
 
 log = structlog.get_logger("api")
@@ -116,3 +123,35 @@ async def notify(
             detail="All deliveries failed",
         )
     return NotifyResponse(status="success", channel=payload.channel, recipients=sent)
+
+
+@api_router.get("/me", response_model=MeResponse)
+async def me(
+    user: CurrentUser,
+    session: DBSession,
+) -> MeResponse:
+    rows = await session.scalars(select(Channel).where(Channel.user_id == user.id))
+    channel_names: list[str] = []
+    for row in rows.unique().all():
+        if row.enabled:
+            channel_names.append(row.type)
+    channel_names = sorted(set(channel_names))
+    return MeResponse(
+        id=user.id,
+        telegram_user_id=user.telegram_user_id,
+        rate_limit_tier=user.rate_limit_tier,
+        channels=channel_names,
+    )
+
+
+@api_router.post("/key/rotate", response_model=MessageResponse)
+async def rotate_key(
+    user: CurrentUser,
+    session: DBSession,
+) -> MessageResponse:
+    """Generate a replacement API key. Old key stops working immediately."""
+    raw_new = generate_api_key()
+    user.api_key_hash = hash_key(raw_new, get_settings().key_pepper)
+    await session.commit()
+    await log.ainfo("api key rotated", user_id=user.id)
+    return MessageResponse(status="success", detail=raw_new)
