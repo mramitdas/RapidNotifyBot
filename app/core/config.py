@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int = 60
     max_payload_bytes: int = 8192
 
+    rate_limit_tiers: dict[str, tuple[int, int]] = {"standard": (60, 60)}
+
     log_level: str = "INFO"
 
     # External base URL used in bot messages (channel page link)
@@ -28,6 +30,12 @@ class Settings(BaseSettings):
 
     def rate_limit_tuples(self) -> tuple[int, int]:
         return self.rate_limit_requests, self.rate_limit_window_seconds
+
+    def rate_limit_for(self, tier: str) -> tuple[int, int]:
+        limits = self.rate_limit_tiers
+        if tier in limits:
+            return limits[tier]
+        return self.rate_limit_tuples()
 
 
 @lru_cache
