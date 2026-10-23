@@ -1,39 +1,31 @@
-"""
-RapidNotifyBot FastAPI Application
+"""RapidNotify v2 API application."""
 
-This FastAPI application serves as the backend for the RapidNotify service, providing a RESTful API for notification management.
-
-Usage:
-    - Create an instance of this FastAPI application to run the RapidNotify service.
-
-Example:
-    ```python
-    from fastapi import FastAPI
-    from .api.V1.api import api_router
-
-    app = FastAPI(title="RapidNotify", docs_url="/")
-    app.include_router(api_router, prefix="/api/v1")
-    ```
-
-Attributes:
-    - title (str): The title of the FastAPI application, set to "RapidNotify".
-    - docs_url (str): The URL path for accessing the FastAPI documentation.
-    - api_router (APIRouter): The router containing the API endpoints for the RapidNotify service.
-    - prefix (str): The URL prefix for the included router, set to "/api/v1".
-
-See Also:
-    - FastAPI documentation for creating applications: https://fastapi.tiangolo.com/tutorial/first-steps/
-"""
-
-from api.V1.api import api_router
+import structlog
 from fastapi import FastAPI
 
-# Create an instance of the FastAPI application
-app = FastAPI(title="RapidNotify", docs_url="/")
-app.include_router(api_router, prefix="/api/v1")
+from app.api.routes.v1 import api_router
 
-# Run the FastAPI application when the script is executed
+log = structlog.get_logger("app")
+
+
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="RapidNotify",
+        version="2.0.0",
+        description=(
+            "Self-hostable notification relay. Subscribe via the Telegram bot, "
+            "then POST messages to /api/v1/notify."
+        ),
+        docs_url="/",
+    )
+    app.include_router(api_router, prefix="/api")
+    return app
+
+
+app = create_app()
+
+
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000)

@@ -37,6 +37,4 @@ async def send_to(
     adapter = get_adapter(channel_type)
     if adapter is None:
         return SendResult(ok=False, detail=f"unknown channel: {channel_type}")
-    return await adapter.send(
-        config, user_id, message, client=client, token=token
-    )
+    return await adapter.send(config, user_id, message, client=client, token=token)
