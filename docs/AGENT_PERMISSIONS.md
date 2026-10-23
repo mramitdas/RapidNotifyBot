@@ -25,11 +25,15 @@ It is referenced by `AGENTS.md` (Guardrails & Boundaries).
 
 ## Explicitly NOT pre-authorized (still require live user approval)
 
-- `git push --force` (including to agent-created branches with history).
+- `git push --force` (including to `prod`/`stag`/`dev` or agent-created
+  branches with history).
 - Publishing, releasing, or deploying to any external host.
 - Committing real secrets or editing `.env` with real credentials.
 - Disabling or bypassing test/lint/type gates or Git hooks.
 - Operations on repos other than `mramitdas/RapidNotifyBot`.
+- PRs that break the merge chain: from a feature branch into `stag`/`prod`
+  directly, or from `stag` into `prod` directly. Promotion is `dev` →
+  `stag` → `prod`, one hop per PR (see AGENTS.md).
 
 Rule: if an action is on the NOT list, stop and ask; everything else on the
 standing list may proceed autonomously.
