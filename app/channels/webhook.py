@@ -9,6 +9,7 @@ from typing import Any
 import httpx
 
 from app.channels.base import SendResult
+from app.core.security import is_ssrf_safe_url
 
 
 class WebhookAdapter:
@@ -30,6 +31,8 @@ class WebhookAdapter:
         target = str(config.get("url", ""))
         if not target:
             return SendResult(ok=False, detail="missing url")
+        if not is_ssrf_safe_url(target, allow_http=True):
+            return SendResult(ok=False, detail="blocked: unsafe url")
         payload = self.build_payload(config, user_id, message)
         try:
             if client is None:

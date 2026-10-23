@@ -7,6 +7,7 @@ hashes are stored. Keys are ``rn_`` followed by 32 URL-safe random chars.
 import hashlib
 import hmac
 import secrets
+import socket
 from ipaddress import IPv4Address, IPv6Address, ip_address, ip_network
 from urllib.parse import urlparse
 
@@ -48,23 +49,45 @@ def generate_registration_token() -> str:
 def is_private_ip(host: str) -> bool:
     """True when *host* is an IP literal in a private/restricted range.
 
-    Plain hostnames (not IP literals) return ``False``; DNS-rebinding
-    protections are documented — outbound sends never follow redirects.
+    Hostnames (not IP literals) are resolved before checking; unresolvable
+    hosts fail closed (treated as unsafe).
     """
     try:
         addr: IPv4Address | IPv6Address = ip_address(host)
     except ValueError:
-        return False
+        return _hostname_resolves_private(host)
     return any(addr in net for net in _TRUSTED)
 
 
+def _hostname_resolves_private(host: str) -> bool:
+    """Resolve *host* via DNS and report whether any address is private."""
+    try:
+        infos = socket.getaddrinfo(host, None, proto=socket.IPPROTO_TCP)
+    except (socket.gaierror, OSError):
+        return True  # fail closed on unresolvable hosts
+    for info in infos:
+        sockaddr = info[4]
+        if isinstance(sockaddr, (tuple, list)):
+            ip_raw = sockaddr[0]
+        elif isinstance(sockaddr, (bytes, bytearray)):
+            ip_raw = bytes(sockaddr)
+        else:
+            ip_raw = sockaddr
+        try:
+            addr = ip_address(ip_raw)
+        except (ValueError, TypeError):
+            return True  # fail closed on unparseable addresses
+        if is_private_ip(str(addr)):
+            return True
+    return False
+
+
 def is_ssrf_safe_url(url: str, allow_http: bool = False) -> bool:
-    """Validate an outbound webhook URL: scheme and host IP.
+    """Validate an outbound webhook URL: scheme and resolved host address.
 
     - scheme must be ``https`` (or ``http`` when *allow_http* is True)
-    - a host that is an IP literal must not be private/restricted
-    - hostname hosts are permitted; redirection is disabled in senders so a
-      user-supplied URL cannot be redirected into an internal address
+    - the host must not resolve to a private/restricted IP range
+      (IP literals and hostnames alike; unresolvable hosts fail closed)
     """
     parsed = urlparse(url)
     allowed_schemes = ("https",) if not allow_http else ("http", "https")
