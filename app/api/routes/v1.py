@@ -87,7 +87,10 @@ async def notify(
         )
 
     try:
-        await check_and_record(session, user.api_key_hash)
+        limit, window_seconds = settings.rate_limit_for(user.rate_limit_tier)
+        await check_and_record(
+            session, user.api_key_hash, limit=limit, window_seconds=window_seconds
+        )
     except RateLimitExceeded as exc:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
