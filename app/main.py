@@ -3,6 +3,7 @@
 import structlog
 from fastapi import FastAPI
 
+from app.api.pages import router as pages_router
 from app.api.routes.v1 import api_router
 
 log = structlog.get_logger("app")
@@ -19,6 +20,7 @@ def create_app() -> FastAPI:
         docs_url="/",
     )
     app.include_router(api_router, prefix="/api")
+    app.include_router(pages_router, prefix="/api")
     return app
 
 
