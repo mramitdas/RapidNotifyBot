@@ -17,7 +17,11 @@ class TelegramAdapter:
         self, config: dict[str, Any], user_id: int, message: str
     ) -> dict[str, Any]:
         chat_id = int(config.get("chat_id", user_id))
-        return {"chat_id": chat_id, "text": message[:4096]}
+        return {
+            "chat_id": chat_id,
+            "text": message[:4096],
+            "parse_mode": "HTML",
+        }
 
     async def send(
         self,
